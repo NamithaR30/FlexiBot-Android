@@ -1,0 +1,27 @@
+
+# Android build files
+**/build/
+**/.gradle/
+**/captures/
+**/.externalNativeBuild/
+**/.cxx/
+
+# Local machine configuration
+local.properties
+**/local.properties
+
+# IDE files
+.idea/
+**/.idea/
+*.iml
+
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Node.js dependencies
+node_modules/
+
+# Logs
+*.log

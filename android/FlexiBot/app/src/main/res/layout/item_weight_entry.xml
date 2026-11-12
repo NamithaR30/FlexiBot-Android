@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/bg_card_dark"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvWeightItemValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="74.5 kg"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvWeightItemDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Nov 13, 2026"
+            android:textColor="@color/grey_text"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tvWeightItemNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Morning weigh-in"
+            android:textColor="@color/grey_text"
+            android:textSize="12sp"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvWeightItemDelta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_chip_unselected"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        android:text="-0.5 kg"
+        android:textColor="@color/electric_red"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

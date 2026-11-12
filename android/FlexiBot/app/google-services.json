@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "383827838015",
+    "project_id": "flexibot-974d8",
+    "storage_bucket": "flexibot-974d8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:383827838015:android:59a30e5bc208d1d370e48a",
+        "android_client_info": {
+          "package_name": "com.example.flexibot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5fDcw_iXzFXLBKbk9TFH06dX56zNuy0s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

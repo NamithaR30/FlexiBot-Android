@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black_primary">
+
+    <!-- Loading spinner when checking database -->
+    <ProgressBar
+        android:id="@+id/progressProfileCheck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- The actual form, hidden until we confirm they need to fill it out -->
+    <ScrollView
+        android:id="@+id/scrollForm"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set Up Your Profile"
+                android:textColor="@color/electric_red"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="24dp" />
+
+            <EditText
+                android:id="@+id/etProfileName"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_field"
+                android:hint="Full Name"
+                android:textColorHint="@color/grey_text"
+                android:textColor="@color/white"
+                android:paddingHorizontal="16dp"
+                android:inputType="textPersonName" />
+
+            <EditText
+                android:id="@+id/etProfileAge"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_field"
+                android:hint="Age"
+                android:textColorHint="@color/grey_text"
+                android:textColor="@color/white"
+                android:paddingHorizontal="16dp"
+                android:inputType="number" />
+
+            <Spinner
+                android:id="@+id/spinnerGender"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_field" />
+
+            <EditText
+                android:id="@+id/etProfileHeight"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_field"
+                android:hint="Height (cm)"
+                android:textColorHint="@color/grey_text"
+                android:textColor="@color/white"
+                android:paddingHorizontal="16dp"
+                android:inputType="numberDecimal" />
+
+            <EditText
+                android:id="@+id/etProfileWeight"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_field"
+                android:hint="Weight (kg)"
+                android:textColorHint="@color/grey_text"
+                android:textColor="@color/white"
+                android:paddingHorizontal="16dp"
+                android:inputType="numberDecimal" />
+
+            <Spinner
+                android:id="@+id/spinnerGoal"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_field" />
+
+            <Spinner
+                android:id="@+id/spinnerLevel"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_field" />
+
+            <Spinner
+                android:id="@+id/spinnerEquipment"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/bg_input_field" />
+
+            <Button
+                android:id="@+id/btnSaveProfile"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="SAVE PROFILE"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="@null" />
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
