@@ -3,6 +3,7 @@ package com.example.flexibot.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,10 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.flexibot.R;
 import com.example.flexibot.models.ChatMessage;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -22,7 +20,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_BOT = 2;
 
     private final List<ChatMessage> messages;
-    private final SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
 
     public ChatAdapter(List<ChatMessage> messages) {
         this.messages = messages;
@@ -30,11 +27,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        ChatMessage msg = messages.get(position);
-        if (ChatMessage.SENDER_USER.equals(msg.getSender())) {
-            return VIEW_TYPE_USER;
-        }
-        return VIEW_TYPE_BOT;
+        return messages.get(position).isUser() ? VIEW_TYPE_USER : VIEW_TYPE_BOT;
     }
 
     @NonNull
@@ -43,49 +36,46 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         if (viewType == VIEW_TYPE_USER) {
             View view = inflater.inflate(R.layout.item_chat_user, parent, false);
-            return new UserMessageViewHolder(view);
+            return new UserViewHolder(view);
         } else {
             View view = inflater.inflate(R.layout.item_chat_bot, parent, false);
-            return new BotMessageViewHolder(view);
+            return new BotViewHolder(view);
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ChatMessage msg = messages.get(position);
-        String formattedTime = timeFormat.format(new Date(msg.getTimestamp()));
-
-        if (holder instanceof UserMessageViewHolder) {
-            ((UserMessageViewHolder) holder).tvMessage.setText(msg.getMessage());
-            ((UserMessageViewHolder) holder).tvTime.setText(formattedTime);
-        } else if (holder instanceof BotMessageViewHolder) {
-            ((BotMessageViewHolder) holder).tvMessage.setText(msg.getMessage());
-            ((BotMessageViewHolder) holder).tvTime.setText(formattedTime);
+        if (holder instanceof UserViewHolder) {
+            ((UserViewHolder) holder).tvUserMessage.setText(msg.getText());
+        } else if (holder instanceof BotViewHolder) {
+            ((BotViewHolder) holder).tvBotMessage.setText(msg.getText());
+            ((BotViewHolder) holder).ivFlexyAvatar.setImageResource(R.drawable.ic_flexy_avatar);
         }
     }
 
     @Override
     public int getItemCount() {
-        return messages != null ? messages.size() : 0;
+        return messages.size();
     }
 
-    static class UserMessageViewHolder extends RecyclerView.ViewHolder {
-        TextView tvMessage, tvTime;
+    static class UserViewHolder extends RecyclerView.ViewHolder {
+        final TextView tvUserMessage;
 
-        UserMessageViewHolder(@NonNull View itemView) {
+        UserViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvMessage = itemView.findViewById(R.id.tvUserMessage);
-            tvTime = itemView.findViewById(R.id.tvUserTime);
+            tvUserMessage = itemView.findViewById(R.id.tvUserMessage);
         }
     }
 
-    static class BotMessageViewHolder extends RecyclerView.ViewHolder {
-        TextView tvMessage, tvTime;
+    static class BotViewHolder extends RecyclerView.ViewHolder {
+        final ImageView ivFlexyAvatar;
+        final TextView tvBotMessage;
 
-        BotMessageViewHolder(@NonNull View itemView) {
+        BotViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvMessage = itemView.findViewById(R.id.tvBotMessage);
-            tvTime = itemView.findViewById(R.id.tvBotTime);
+            ivFlexyAvatar = itemView.findViewById(R.id.ivChatFlexyAvatar);
+            tvBotMessage = itemView.findViewById(R.id.tvBotMessage);
         }
     }
 }

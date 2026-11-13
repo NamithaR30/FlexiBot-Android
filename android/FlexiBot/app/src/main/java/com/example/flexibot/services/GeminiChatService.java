@@ -16,38 +16,40 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class GeminiChatService {
 
-    // Uses localhost (127.0.0.1) bridged directly over your USB cable via `adb reverse tcp:3000 tcp:3000`.
-    // (If you disconnect USB and test over Wi-Fi later, replace 127.0.0.1 with your PC's Wi-Fi IPv4 address.)
-    private static final String BACKEND_URL = "http://127.0.0.1:3000/api/chat";
+    private static final String BACKEND_CHAT_URL = "http://localhost:3000/api/chat";
+    private static final int MAX_HISTORY_MESSAGES = 8;
+
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     public interface ChatCallback {
         void onSuccess(String reply);
         void onError(String errorMessage);
     }
 
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    public void sendMessage(String userMessage, User userProfile, ChatCallback callback) {
+        sendMessage(userMessage, userProfile, null, callback);
+    }
 
-    public void sendMessage(String userMessage, User userProfile, List<ChatMessage> recentHistory, ChatCallback callback) {
-        executor.execute(() -> {
-            HttpURLConnection connection = null;
+    public void sendMessage(
+            String userMessage,
+            User userProfile,
+            List<ChatMessage> history,
+            ChatCallback callback
+    ) {
+        final List<ChatMessage> historySnapshot = history != null
+                ? new ArrayList<>(history)
+                : new ArrayList<>();
+
+        executorService.execute(() -> {
             try {
-                URL url = new URL(BACKEND_URL);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-                connection.setRequestProperty("Accept", "application/json");
-                connection.setConnectTimeout(15000);
-                connection.setReadTimeout(60000);
-                connection.setDoOutput(true);
-
-                // Build JSON payload
                 JSONObject payload = new JSONObject();
                 payload.put("message", userMessage);
 
@@ -64,34 +66,30 @@ public class GeminiChatService {
                     payload.put("userProfile", profileJson);
                 }
 
-                // Include up to the last 12 messages for conversational memory
-                JSONArray historyArray = new JSONArray();
-                if (recentHistory != null && !recentHistory.isEmpty()) {
-                    int startIdx = Math.max(0, recentHistory.size() - 12);
-                    for (int i = startIdx; i < recentHistory.size(); i++) {
-                        ChatMessage msg = recentHistory.get(i);
-                        JSONObject turn = new JSONObject();
-                        turn.put("role", ChatMessage.SENDER_USER.equals(msg.getSender()) ? "user" : "model");
-                        turn.put("text", msg.getMessage());
-                        historyArray.put(turn);
-                    }
-                }
+                JSONArray historyArray = buildHistoryJsonArray(historySnapshot, userMessage);
                 payload.put("history", historyArray);
 
-                // Send request
-                try (OutputStream os = connection.getOutputStream()) {
-                    byte[] input = payload.toString().getBytes(StandardCharsets.UTF_8);
-                    os.write(input, 0, input.length);
+                URL url = new URL(BACKEND_CHAT_URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                conn.setConnectTimeout(15000);
+                conn.setReadTimeout(30000);
+                conn.setDoOutput(true);
+
+                try (OutputStream os = conn.getOutputStream()) {
+                    os.write(payload.toString().getBytes(StandardCharsets.UTF_8));
                 }
 
-                int responseCode = connection.getResponseCode();
-                InputStream stream = (responseCode >= 200 && responseCode < 300)
-                        ? connection.getInputStream()
-                        : connection.getErrorStream();
+                int statusCode = conn.getResponseCode();
+                InputStream responseStream = (statusCode >= 200 && statusCode < 300)
+                        ? conn.getInputStream()
+                        : conn.getErrorStream();
 
                 StringBuilder responseBuilder = new StringBuilder();
-                if (stream != null) {
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+                if (responseStream != null) {
+                    try (BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(responseStream, StandardCharsets.UTF_8))) {
                         String line;
                         while ((line = reader.readLine()) != null) {
                             responseBuilder.append(line);
@@ -99,25 +97,74 @@ public class GeminiChatService {
                     }
                 }
 
-                JSONObject responseJson = new JSONObject(responseBuilder.toString());
+                JSONObject jsonResponse = new JSONObject(responseBuilder.toString());
 
-                if (responseCode >= 200 && responseCode < 300 && responseJson.has("reply")) {
-                    String reply = responseJson.getString("reply");
-                    mainHandler.post(() -> callback.onSuccess(reply));
+                if (statusCode >= 200 && statusCode < 300) {
+                    String reply = jsonResponse.optString(
+                            "reply",
+                            "FLEXY couldn't generate a response right now. Please try again."
+                    );
+                    postSuccess(callback, reply);
                 } else {
-                    String err = responseJson.optString("error", "Server returned error code: " + responseCode);
-                    mainHandler.post(() -> callback.onError(err));
+                    String error = jsonResponse.optString(
+                            "error",
+                            "Server returned error code " + statusCode
+                    );
+                    postError(callback, error);
                 }
-
             } catch (Exception e) {
-                mainHandler.post(() -> callback.onError(
-                        "Cannot reach FlexiBot AI server. Make sure your Node.js backend is running (" + e.getMessage() + ")"
-                ));
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
+                postError(
+                        callback,
+                        "Unable to reach FLEXY backend. Ensure Node.js is running and adb reverse tcp:3000 tcp:3000 is active."
+                );
             }
         });
+    }
+
+    private JSONArray buildHistoryJsonArray(List<ChatMessage> history, String latestUserMessage) {
+        JSONArray historyArray = new JSONArray();
+        if (history == null || history.isEmpty()) {
+            return historyArray;
+        }
+
+        int endIndex = history.size();
+        ChatMessage lastItem = history.get(endIndex - 1);
+        if (lastItem != null
+                && lastItem.isUser()
+                && latestUserMessage != null
+                && latestUserMessage.equals(lastItem.getText())) {
+            endIndex--;
+        }
+
+        int startIndex = Math.max(0, endIndex - MAX_HISTORY_MESSAGES);
+        for (int i = startIndex; i < endIndex; i++) {
+            ChatMessage msg = history.get(i);
+            if (msg == null || msg.getText() == null || msg.getText().trim().isEmpty()) {
+                continue;
+            }
+            try {
+                JSONObject itemJson = new JSONObject();
+                itemJson.put("role", msg.isUser() ? "user" : "model");
+                itemJson.put("text", msg.getText());
+                historyArray.put(itemJson);
+            } catch (Exception ignored) {
+            }
+        }
+
+        return historyArray;
+    }
+
+    private void postSuccess(ChatCallback callback, String reply) {
+        if (callback == null) return;
+        mainHandler.post(() -> callback.onSuccess(reply));
+    }
+
+    private void postError(ChatCallback callback, String error) {
+        if (callback == null) return;
+        mainHandler.post(() -> callback.onError(error));
+    }
+
+    public void shutdown() {
+        executorService.shutdownNow();
     }
 }

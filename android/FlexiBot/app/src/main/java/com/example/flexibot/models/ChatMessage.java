@@ -1,26 +1,40 @@
 package com.example.flexibot.models;
 
 public class ChatMessage {
-    public static final String SENDER_USER = "user";
-    public static final String SENDER_BOT = "bot";
-
-    private String id;
-    private String sender;
-    private String message;
+    private String text;
+    private boolean isUser;
     private long timestamp;
 
-    // Empty constructor required for Firestore
-    public ChatMessage() {}
-
-    public ChatMessage(String id, String sender, String message, long timestamp) {
-        this.id = id;
-        this.sender = sender;
-        this.message = message;
-        this.timestamp = timestamp;
+    public ChatMessage() {
     }
 
-    public String getId() { return id; }
-    public String getSender() { return sender; }
-    public String getMessage() { return message; }
-    public long getTimestamp() { return timestamp; }
+    public ChatMessage(String text, boolean isUser) {
+        this.text = text;
+        this.isUser = isUser;
+        this.timestamp = System.currentTimeMillis();
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public boolean isUser() {
+        return isUser;
+    }
+
+    public void setUser(boolean user) {
+        isUser = user;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 }
