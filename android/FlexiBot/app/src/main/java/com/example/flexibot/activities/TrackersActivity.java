@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -30,6 +31,8 @@ import com.example.flexibot.models.FitnessGoalTarget;
 import com.example.flexibot.models.WaterLog;
 import com.example.flexibot.models.WeightEntry;
 import com.example.flexibot.models.WorkoutSession;
+import com.example.flexibot.utils.FlexyAnimator;
+import com.example.flexibot.utils.FlexyBuddyHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -57,10 +60,12 @@ public class TrackersActivity extends AppCompatActivity {
     private WeightHistoryAdapter weightAdapter;
     private long selectedWeightTimestamp = System.currentTimeMillis();
 
-    // Water Tracker Views
+    // Water Tracker & FLEXY Views
     private TextView tvWaterTodayTotal, tvWaterPercentText;
     private ProgressBar pbTrackerWater;
     private EditText etCustomWaterMl;
+    private ImageView ivWaterFlexyAvatar;
+    private TextView tvWaterFlexyBadge, tvWaterFlexySpeech;
     private int dailyWaterGoalMl = 2500;
     private int todayWaterTotalMl = 0;
 
@@ -141,6 +146,10 @@ public class TrackersActivity extends AppCompatActivity {
             tabs[i].setTextColor(ContextCompat.getColor(this, active ? R.color.white : R.color.grey_text));
             sections[i].setVisibility(active ? View.VISIBLE : View.GONE);
         }
+
+        if (index == 1 && ivWaterFlexyAvatar != null) {
+            syncFlexyWaterBaselineState();
+        }
     }
 
     // =========================================================================
@@ -208,7 +217,6 @@ public class TrackersActivity extends AppCompatActivity {
                     selectedWeightTimestamp = System.currentTimeMillis();
                     btnPickWeightDate.setText("Today");
 
-                    // Keep user's main profile weight up to date
                     db.collection("users").document(uid).update("weight", weightKg);
 
                     Toast.makeText(this, "Weight entry saved!", Toast.LENGTH_SHORT).show();
@@ -253,13 +261,17 @@ public class TrackersActivity extends AppCompatActivity {
     }
 
     // =========================================================================
-    // B. WATER TRACKER (AUTOMATIC DAILY RESET VIA DATE KEY)
+    // B. WATER TRACKER + LIVE FLEXY REACTIONS
     // =========================================================================
     private void setupWaterTracker() {
         tvWaterTodayTotal = findViewById(R.id.tvWaterTodayTotal);
         tvWaterPercentText = findViewById(R.id.tvWaterPercentText);
         pbTrackerWater = findViewById(R.id.pbTrackerWater);
         etCustomWaterMl = findViewById(R.id.etCustomWaterMl);
+
+        ivWaterFlexyAvatar = findViewById(R.id.ivWaterFlexyAvatar);
+        tvWaterFlexyBadge = findViewById(R.id.tvWaterFlexyBadge);
+        tvWaterFlexySpeech = findViewById(R.id.tvWaterFlexySpeech);
 
         Button btn150 = findViewById(R.id.btnWater150);
         Button btn250 = findViewById(R.id.btnWater250);
@@ -307,14 +319,64 @@ public class TrackersActivity extends AppCompatActivity {
         db.collection("users").document(uid).collection("waterIntake").document(logId)
                 .set(log)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "+" + amountMl + " ml logged!", Toast.LENGTH_SHORT).show();
-                    loadTodayWaterIntake();
+                    todayWaterTotalMl += amountMl;
+                    updateWaterUI();
+                    triggerFlexyWaterReaction(amountMl);
+                    loadTodayWaterIntake(false);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to log water: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    private void loadTodayWaterIntake() {
+    private void triggerFlexyWaterReaction(int addedMl) {
+        if (ivWaterFlexyAvatar == null) return;
+
+        FlexyBuddyHelper.BuddyState reaction =
+                FlexyBuddyHelper.getWaterLoggedReaction(addedMl, todayWaterTotalMl, dailyWaterGoalMl);
+
+        ivWaterFlexyAvatar.setImageResource(reaction.avatarResId);
+        tvWaterFlexyBadge.setText(reaction.moodLabel);
+        tvWaterFlexySpeech.setText(reaction.message);
+
+        if (reaction.mood == FlexyBuddyHelper.Mood.CELEBRATING) {
+            FlexyAnimator.playCelebratingSpin(ivWaterFlexyAvatar, true);
+        } else {
+            FlexyAnimator.playHappyBounce(ivWaterFlexyAvatar, true);
+        }
+    }
+
+    private void syncFlexyWaterBaselineState() {
+        if (ivWaterFlexyAvatar == null) return;
+
+        FlexyBuddyHelper.BuddyState state = FlexyBuddyHelper.getCurrentBuddyState(
+                "Champ",
+                "Hydration",
+                0,
+                todayWaterTotalMl,
+                dailyWaterGoalMl
+        );
+
+        ivWaterFlexyAvatar.setImageResource(state.avatarResId);
+        tvWaterFlexyBadge.setText(state.moodLabel);
+        tvWaterFlexySpeech.setText(state.message);
+
+        switch (state.mood) {
+            case CELEBRATING:
+                FlexyAnimator.playCelebratingSpin(ivWaterFlexyAvatar, true);
+                break;
+            case ENCOURAGING:
+                FlexyAnimator.playEncouragingNod(ivWaterFlexyAvatar, true);
+                break;
+            case HAPPY:
+                FlexyAnimator.playHappyBounce(ivWaterFlexyAvatar, true);
+                break;
+            default:
+                FlexyAnimator.startIdleAnimation(ivWaterFlexyAvatar);
+                break;
+        }
+    }
+
+    private void loadTodayWaterIntake(boolean updateFlexyState) {
         String todayKey = getTodayDateKey();
         db.collection("users").document(uid).collection("waterIntake")
                 .whereEqualTo("dateKey", todayKey)
@@ -328,6 +390,9 @@ public class TrackersActivity extends AppCompatActivity {
                         }
                     }
                     updateWaterUI();
+                    if (updateFlexyState) {
+                        syncFlexyWaterBaselineState();
+                    }
                 });
     }
 
@@ -359,6 +424,7 @@ public class TrackersActivity extends AppCompatActivity {
                                         .putInt("daily_water_goal_ml", dailyWaterGoalMl)
                                         .apply();
                                 updateWaterUI();
+                                syncFlexyWaterBaselineState();
                                 Toast.makeText(this, "Water goal updated!", Toast.LENGTH_SHORT).show();
                             }
                         } catch (NumberFormatException ignored) {}
@@ -381,6 +447,7 @@ public class TrackersActivity extends AppCompatActivity {
                     batch.commit().addOnSuccessListener(aVoid -> {
                         todayWaterTotalMl = 0;
                         updateWaterUI();
+                        syncFlexyWaterBaselineState();
                         Toast.makeText(this, "Today's water intake reset", Toast.LENGTH_SHORT).show();
                     });
                 });
@@ -599,8 +666,20 @@ public class TrackersActivity extends AppCompatActivity {
 
     private void loadAllTrackerData() {
         loadWeightHistory();
-        loadTodayWaterIntake();
+        loadTodayWaterIntake(true);
         loadWorkoutTrackerHistory();
         loadGoalTargets();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        FlexyAnimator.stopAnimation(ivWaterFlexyAvatar);
+    }
+
+    @Override
+    protected void onDestroy() {
+        FlexyAnimator.stopAnimation(ivWaterFlexyAvatar);
+        super.onDestroy();
     }
 }

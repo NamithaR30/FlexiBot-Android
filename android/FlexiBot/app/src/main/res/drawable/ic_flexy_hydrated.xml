@@ -1,0 +1,108 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Subtle Ground Shadow -->
+    <path
+        android:fillColor="#26262E"
+        android:pathData="M60,104 C74.36,104 86,105.79 86,108 C86,110.21 74.36,112 60,112 C45.64,112 34,110.21 34,108 C34,105.79 45.64,104 60,104 Z" />
+
+    <!-- Plump Curved Electric Red Handle -->
+    <path
+        android:fillColor="#FF2E4C"
+        android:fillType="evenOdd"
+        android:pathData="M42,46 C34,37 30,27 33,19 C35,13 42,11 60,11 C78,11 85,13 87,19 C90,27 86,37 78,46 Z M48,38 C43,32 41,26 42.5,22.5 C44,19.5 49,19 60,19 C71,19 76,19.5 77.5,22.5 C79,26 77,32 72,38 C65,36.5 55,36.5 48,38 Z"
+        android:strokeColor="#0B0D14"
+        android:strokeLineJoin="round"
+        android:strokeWidth="4.2" />
+
+    <!-- Curved Handle Glossy Highlight & Dot -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M41.5,15.2 C45.5,14.3 49.5,14.1 54,14.1"
+        android:strokeColor="#FFB3C6"
+        android:strokeLineCap="round"
+        android:strokeWidth="2.8" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M59,14.1 L60.6,14.1"
+        android:strokeColor="#FFB3C6"
+        android:strokeLineCap="round"
+        android:strokeWidth="2.8" />
+
+    <!-- Main Electric Red Kettlebell Body -->
+    <path
+        android:fillColor="#FF2E4C"
+        android:pathData="M60,40 C83,40 96,54 96,74 C96,89 88,99 78,104 L42,104 C32,99 24,89 24,74 C24,54 37,40 60,40 Z" />
+
+    <!-- Soft Crescent Shading -->
+    <path
+        android:fillColor="#D61A36"
+        android:pathData="M75,45 C88,52 94,63 94,74 C94,88 86,97 77,102 L43,102 C39,100 36,97 34,94 C46,97 65,97 76,89 C86,81 87,61 75,45 Z" />
+
+    <!-- Left Body Glossy Highlight Curve & Dot -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M31.5,67 C32.5,57 38,49.5 46,46"
+        android:strokeColor="#FFB3C6"
+        android:strokeLineCap="round"
+        android:strokeWidth="3.5" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M31,73.5 L31,75"
+        android:strokeColor="#FFB3C6"
+        android:strokeLineCap="round"
+        android:strokeWidth="3.5" />
+
+    <!-- Body Bold Dark Outline -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M60,40 C83,40 96,54 96,74 C96,89 88,99 78,104 L42,104 C32,99 24,89 24,74 C24,54 37,40 60,40 Z"
+        android:strokeColor="#0B0D14"
+        android:strokeLineJoin="round"
+        android:strokeWidth="4.2" />
+
+    <!-- Joyful Happy Curved Eyes (^ ^) -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M41.5,76 C43.5,70.5 48.5,70.5 50.5,76"
+        android:strokeColor="#0B0D14"
+        android:strokeLineCap="round"
+        android:strokeWidth="3.2" />
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M69.5,76 C71.5,70.5 76.5,70.5 78.5,76"
+        android:strokeColor="#0B0D14"
+        android:strokeLineCap="round"
+        android:strokeWidth="3.2" />
+
+    <!-- Soft Pink Rosy Cheeks -->
+    <path
+        android:fillColor="#FFB3C6"
+        android:pathData="M39.5,80.8 C41.7,80.8 43.5,81.8 43.5,83 C43.5,84.2 41.7,85.2 39.5,85.2 C37.3,85.2 35.5,84.2 35.5,83 C35.5,81.8 37.3,80.8 39.5,80.8 Z" />
+    <path
+        android:fillColor="#FFB3C6"
+        android:pathData="M80.5,80.8 C82.7,80.8 84.5,81.8 84.5,83 C84.5,84.2 82.7,85.2 80.5,85.2 C78.3,85.2 76.5,84.2 76.5,83 C76.5,81.8 78.3,80.8 80.5,80.8 Z" />
+
+    <!-- Cute Kawaii Smile -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M55,83 C56.5,88.5 63.5,88.5 65,83"
+        android:strokeColor="#0B0D14"
+        android:strokeLineCap="round"
+        android:strokeWidth="3.2" />
+
+    <!-- Cute Floating Water Droplet Accent -->
+    <path
+        android:fillColor="#4FC3F7"
+        android:pathData="M98,16 C98,16 91,25.5 91,30.5 C91,34.4 94.1,37.5 98,37.5 C101.9,37.5 105,34.4 105,30.5 C105,25.5 98,16 98,16 Z"
+        android:strokeColor="#0B0D14"
+        android:strokeLineJoin="round"
+        android:strokeWidth="2.6" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M95.5,28.5 C96.3,28.5 97,29.2 97,30 C97,30.8 96.3,31.5 95.5,31.5 C94.7,31.5 94,30.8 94,30 C94,29.2 94.7,28.5 95.5,28.5 Z" />
+
+</vector>

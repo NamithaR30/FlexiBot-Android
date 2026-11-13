@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +25,8 @@ import com.example.flexibot.activities.TrackersActivity;
 import com.example.flexibot.models.User;
 import com.example.flexibot.models.WaterLog;
 import com.example.flexibot.models.WorkoutSession;
+import com.example.flexibot.utils.FlexyAnimator;
+import com.example.flexibot.utils.FlexyBuddyHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -37,8 +41,20 @@ public class HomeFragment extends Fragment {
 
     private TextView tvGreeting, tvGoal, tvWeight, tvStreak, tvWorkoutLabel, tvWaterLabel;
     private ProgressBar pbWorkoutProgress, pbWaterProgress;
+
+    private LinearLayout cardFlexyBuddy;
+    private ImageView ivFlexyAvatar;
+    private TextView tvFlexyMoodBadge, tvFlexySpeech, tvFlexyHydrationStatus;
+
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+
+    private String savedUserName = "";
+    private String savedFitnessGoal = "General fitness";
+    private int workoutsCompletedToday = 0;
+    private int waterLoggedTodayMl = 0;
+    private int dailyWaterGoalMl = 2500;
+    private FlexyBuddyHelper.Mood lastAppliedMood = null;
 
     @Nullable
     @Override
@@ -56,6 +72,19 @@ public class HomeFragment extends Fragment {
         tvWaterLabel = view.findViewById(R.id.tvHomeWaterLabel);
         pbWorkoutProgress = view.findViewById(R.id.pbWorkoutProgress);
         pbWaterProgress = view.findViewById(R.id.pbWaterProgress);
+
+        cardFlexyBuddy = view.findViewById(R.id.cardFlexyBuddy);
+        ivFlexyAvatar = view.findViewById(R.id.ivFlexyAvatar);
+        tvFlexyMoodBadge = view.findViewById(R.id.tvFlexyMoodBadge);
+        tvFlexySpeech = view.findViewById(R.id.tvFlexySpeech);
+        tvFlexyHydrationStatus = view.findViewById(R.id.tvFlexyHydrationStatus);
+
+        cardFlexyBuddy.setOnClickListener(v -> {
+            ivFlexyAvatar.setImageResource(FlexyBuddyHelper.getAvatarForMood(FlexyBuddyHelper.Mood.ENCOURAGING));
+            tvFlexyMoodBadge.setText("FLEXY • COACH TIP");
+            tvFlexySpeech.setText(FlexyBuddyHelper.getRandomBuddyTip(savedUserName, savedFitnessGoal));
+            FlexyAnimator.playEncouragingNod(ivFlexyAvatar, true);
+        });
 
         CardView cardAIChat = view.findViewById(R.id.cardAIChat);
         CardView cardWorkouts = view.findViewById(R.id.cardWorkouts);
@@ -77,12 +106,71 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+    private void refreshFlexyBuddyCard() {
+        if (!isAdded() || ivFlexyAvatar == null) return;
+
+        int pct = dailyWaterGoalMl > 0 ? Math.min(100, (waterLoggedTodayMl * 100) / dailyWaterGoalMl) : 0;
+        tvFlexyHydrationStatus.setText(String.format(
+                Locale.getDefault(),
+                "Hydration Target: %,d / %,d ml (%d%%)",
+                waterLoggedTodayMl, dailyWaterGoalMl, pct
+        ));
+
+        FlexyBuddyHelper.BuddyState state = FlexyBuddyHelper.getCurrentBuddyState(
+                savedUserName,
+                savedFitnessGoal,
+                workoutsCompletedToday,
+                waterLoggedTodayMl,
+                dailyWaterGoalMl
+        );
+
+        tvFlexyMoodBadge.setText(state.moodLabel);
+        tvFlexySpeech.setText(state.message);
+        ivFlexyAvatar.setImageResource(state.avatarResId);
+
+        if (lastAppliedMood != state.mood) {
+            lastAppliedMood = state.mood;
+            switch (state.mood) {
+                case CELEBRATING:
+                    FlexyAnimator.playCelebratingSpin(ivFlexyAvatar, true);
+                    break;
+                case EXCITED:
+                    FlexyAnimator.playExcitedJump(ivFlexyAvatar, true);
+                    break;
+                case HAPPY:
+                    FlexyAnimator.playHappyBounce(ivFlexyAvatar, true);
+                    break;
+                case ENCOURAGING:
+                    FlexyAnimator.playEncouragingNod(ivFlexyAvatar, true);
+                    break;
+                default:
+                    FlexyAnimator.startIdleAnimation(ivFlexyAvatar);
+                    break;
+            }
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
+        if (ivFlexyAvatar != null) {
+            FlexyAnimator.startIdleAnimation(ivFlexyAvatar);
+        }
         loadUserData();
         loadWorkoutProgress();
         loadDailyWaterProgress();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        FlexyAnimator.stopAnimation(ivFlexyAvatar);
+    }
+
+    @Override
+    public void onDestroyView() {
+        FlexyAnimator.stopAnimation(ivFlexyAvatar);
+        super.onDestroyView();
     }
 
     private void switchTab(int menuItemId) {
@@ -104,9 +192,13 @@ public class HomeFragment extends Fragment {
                     if (documentSnapshot.exists()) {
                         User user = documentSnapshot.toObject(User.class);
                         if (user != null) {
-                            tvGreeting.setText("Welcome back, " + user.getName() + "!");
-                            tvGoal.setText(user.getFitnessGoal());
+                            savedUserName = user.getName();
+                            savedFitnessGoal = user.getFitnessGoal();
+
+                            tvGreeting.setText("Welcome back, " + savedUserName + "!");
+                            tvGoal.setText(savedFitnessGoal);
                             tvWeight.setText(user.getWeight() + " kg");
+                            refreshFlexyBuddyCard();
                         }
                     }
                 })
@@ -132,18 +224,19 @@ public class HomeFragment extends Fragment {
                 .addOnSuccessListener(snapshots -> {
                     if (!isAdded()) return;
                     int totalSessions = snapshots.size();
-                    int completedTodayCount = 0;
+                    workoutsCompletedToday = 0;
 
                     for (DocumentSnapshot doc : snapshots) {
                         WorkoutSession session = doc.toObject(WorkoutSession.class);
                         if (session != null && session.getTimestamp() >= todayStartMillis) {
-                            completedTodayCount++;
+                            workoutsCompletedToday++;
                         }
                     }
 
-                    tvWorkoutLabel.setText("Workout Goal (" + Math.min(1, completedTodayCount) + " / 1 Completed)");
-                    pbWorkoutProgress.setProgress(completedTodayCount > 0 ? 100 : 0);
+                    tvWorkoutLabel.setText("Workout Goal (" + Math.min(1, workoutsCompletedToday) + " / 1 Completed)");
+                    pbWorkoutProgress.setProgress(workoutsCompletedToday > 0 ? 100 : 0);
                     tvStreak.setText(totalSessions + (totalSessions == 1 ? " Workout" : " Workouts"));
+                    refreshFlexyBuddyCard();
                 });
     }
 
@@ -152,7 +245,7 @@ public class HomeFragment extends Fragment {
         String uid = mAuth.getCurrentUser().getUid();
 
         SharedPreferences prefs = getContext().getSharedPreferences("FlexiBotPrefs", Context.MODE_PRIVATE);
-        int waterGoal = prefs.getInt("daily_water_goal_ml", 2500);
+        dailyWaterGoalMl = prefs.getInt("daily_water_goal_ml", 2500);
         String todayKey = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
         db.collection("users").document(uid).collection("waterIntake")
@@ -160,16 +253,17 @@ public class HomeFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(snapshots -> {
                     if (!isAdded()) return;
-                    int todayTotal = 0;
+                    waterLoggedTodayMl = 0;
                     for (DocumentSnapshot doc : snapshots) {
                         WaterLog log = doc.toObject(WaterLog.class);
                         if (log != null) {
-                            todayTotal += log.getAmountMl();
+                            waterLoggedTodayMl += log.getAmountMl();
                         }
                     }
-                    tvWaterLabel.setText(String.format(Locale.getDefault(), "Water Intake (%,d / %,d ml)", todayTotal, waterGoal));
-                    int pct = waterGoal > 0 ? Math.min(100, (todayTotal * 100) / waterGoal) : 0;
+                    tvWaterLabel.setText(String.format(Locale.getDefault(), "Water Intake (%,d / %,d ml)", waterLoggedTodayMl, dailyWaterGoalMl));
+                    int pct = dailyWaterGoalMl > 0 ? Math.min(100, (waterLoggedTodayMl * 100) / dailyWaterGoalMl) : 0;
                     pbWaterProgress.setProgress(pct);
+                    refreshFlexyBuddyCard();
                 });
     }
 }

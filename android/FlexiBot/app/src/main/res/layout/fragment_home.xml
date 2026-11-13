@@ -31,11 +31,81 @@
             android:textColor="@color/grey_text"
             android:textSize="14sp" />
 
+        <!-- FLEXY Interactive Companion Card -->
+        <LinearLayout
+            android:id="@+id/cardFlexyBuddy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_card_dark"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="14dp">
+
+            <ImageView
+                android:id="@+id/ivFlexyAvatar"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:contentDescription="FLEXY Fitness Buddy"
+                android:src="@drawable/ic_flexy_avatar" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvFlexyMoodBadge"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="FLEXY • READY"
+                        android:textColor="@color/electric_red"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tap for tip"
+                        android:textColor="@color/grey_text"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvFlexySpeech"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:lineSpacingExtra="2dp"
+                    android:text="Hey! I'm FLEXY, your kettlebell workout buddy. Ready to crush today's session?"
+                    android:textColor="@color/white"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvFlexyHydrationStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Hydration Target: 0 / 2,500 ml (0%)"
+                    android:textColor="@color/grey_text"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </LinearLayout>
+
         <!-- User Profile Quick Overview Cards -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
@@ -131,7 +201,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             android:background="@drawable/bg_card_dark"
             android:orientation="vertical"
             android:padding="20dp">
@@ -148,7 +218,7 @@
                 android:id="@+id/tvHomeWorkoutLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="14dp"
                 android:text="Workout Goal (0 / 1 Completed)"
                 android:textColor="@color/grey_text"
                 android:textSize="13sp" />
@@ -167,7 +237,7 @@
                 android:id="@+id/tvHomeWaterLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="14dp"
                 android:text="Water Intake (0 / 2500 ml)"
                 android:textColor="@color/grey_text"
                 android:textSize="13sp" />
@@ -187,7 +257,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="20dp"
             android:text="Quick Actions"
             android:textColor="@color/white"
             android:textSize="18sp"
@@ -200,7 +270,7 @@
             android:columnCount="2"
             android:rowCount="3">
 
-            <!-- AI Assistant Card -->
+            <!-- Ask FLEXY AI Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardAIChat"
                 android:layout_width="0dp"
@@ -229,7 +299,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Ask FlexiBot AI"
+                        android:text="Ask FLEXY AI"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -379,6 +449,7 @@
                         android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
             <!-- Reminders Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardReminders"
