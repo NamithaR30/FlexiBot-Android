@@ -15,6 +15,8 @@
         android:background="@drawable/bg_card_dark"
         android:orientation="vertical"
         android:padding="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -75,14 +77,64 @@
             android:progressTint="@color/electric_red" />
     </LinearLayout>
 
+    <!-- Non-Blocking FLEXY Live Workout Coach Banner (Positioned Below Timer) -->
+    <LinearLayout
+        android:id="@+id/cardWorkoutFlexy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_card_dark"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardTimerHeader">
+
+        <ImageView
+            android:id="@+id/ivWorkoutFlexyAvatar"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:contentDescription="FLEXY Workout Coach"
+            android:src="@drawable/ic_flexy_avatar" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvWorkoutFlexyBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FLEXY • FORM CUE"
+                android:textColor="@color/electric_red"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvWorkoutFlexyTip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Focus on smooth, controlled reps—you've got this!"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
     <!-- Checklist RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvActiveExercises"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginVertical="16dp"
+        android:layout_marginVertical="12dp"
         app:layout_constraintBottom_toTopOf="@id/btnFinishWorkout"
-        app:layout_constraintTop_toBottomOf="@id/cardTimerHeader" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardWorkoutFlexy" />
 
     <ProgressBar
         android:id="@+id/progressSavingWorkout"
@@ -104,6 +156,8 @@
         android:textSize="16sp"
         android:textStyle="bold"
         app:backgroundTint="@null"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
